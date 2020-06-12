@@ -1,0 +1,108 @@
+---
+title: "StatLearningCoursework1"
+author: "Jordan Vauls"
+date: "10/03/2020"
+output: pdf_document
+---
+
+## Loading the CSV into the RStdio
+```{r setup, include=FALSE}
+#inserting the data into the rstudio as a dataframe.
+data_set <- read.csv("C:\\Users\\JordanLaptop\\Desktop\\StatLearningCoursework1\\medal_pop_gdp_data_statlearn.csv")
+```
+## Linear regression for 2008 medals prediction from medal count and gdp
+```{r}
+#multiple linear regression 2008 medal count prediction from population and gdp
+medals_2008 <- glm(data_set$Medal2008 ~ data_set$GDP + data_set$Population)
+#summary table of coefficients and standard errors for 2008 medals
+summary_2008 = summary(medals_2008)$coefficients
+print(summary_2008)
+```
+## Linear regression for 2012 medals prediction from medal count and gdp
+```{r}
+medals_2012 = glm(Medal2012 ~ GDP + Population, data=data_set)
+#summary table of coefficients and standard errors for 2012 medals
+summary_2012 = summary(medals_2012)$coefficients
+print(summary_2012)
+```
+```{r}
+#multiple linear regression 2016 medal count prediction from population and gdp
+medals_2016 <- glm(data_set$Medal2016 ~ data_set$GDP + data_set$Population)
+#summary table of coefficients and standard errors for 2008 medals
+summary_2016 = summary(medals_2016)$coefficients
+print(summary_2016)
+```
+
+```{r}
+t_critical = qt(0.975, 68)
+estimate = summary_2008[2,1]
+sterr = summary_2008[2,2]
+
+interval_min = estimate - t_critical*sterr
+interval_max = estimate + t_critical*sterr
+
+print(paste(c("Min: ", interval_min), collapse = ""))
+print(paste(c("Max: ", interval_max), collapse = ""))
+print(paste(c("Estimate: ", estimate), collapse = ""))
+print(paste(c("sterr: ", sterr), collapse = ""))
+```
+```{r}
+t_critical = qt(0.975, 68)
+estimate = summary_2012[2,1]
+sterr = summary_2012[2,2]
+
+interval_min = estimate - t_critical*sterr
+interval_max = estimate + t_critical*sterr
+print(paste(c("Min: ", interval_min), collapse = ""))
+print(paste(c("Max: ", interval_max), collapse = ""))
+```
+```{r}
+predictions <- predict(medals_2012, newdata = data_set, interval = "prediction")
+CI1 = summary(medals_2012)$coefficients[2, 1] +
+c(-1,1)*t_critical*summary(medals_2012)$coefficients[2, 2]
+print(CI1)
+```
+```{r}
+CI1 = summary(faithful_model)$coefficients[2, 1] +
+c(-1,1)*tc*summary(faithful_model)$coefficients[2, 2]
+print(CI1)
+```
+## R Markdown
+```{r}
+
+summary(data_set$Medal2012)
+
+iqr2012 <-IQR(data_set$Medal2012)
+
+UpperInnerFence <- 13 + 1.5 * iqr2012
+LowerInnerFence <- 1 - 1.5 * iqr2012
+
+library(dplyr)
+
+highlight_df <- mydata %>% 
+             filter(Medal2012>UpperInnerFence | Medal2012<LowerInnerFence)
+
+
+predict(medals_2012, newdata = data_set)
+predict(medals_2012, newdata = data_set, interval = "confidence")
+predict(medals_2012, newdata = data_set, interval = "prediction")
+
+medals_2012 = glm(Medal2012 ~ GDP + Population, data=data_set)
+# 1. Add predictions 
+pred.int <- predict(medals_2012, interval = "prediction")
+mydata <- cbind(data_set, pred.int)
+
+# 2. Regression line + confidence intervals
+library("ggplot2")
+
+ggplot(mydata, aes(pred.int,mydata$Medal2016)) +
+  geom_point() +
+  stat_smooth(method = lm)+
+  geom_point(data=highlight_df,
+             aes(x=pred.int,y=Medal2016, color=Country),size=3)
+
+pregnancy.df.IQR <-IQR()
+
+print(summary(medals_2012))
+```
+
